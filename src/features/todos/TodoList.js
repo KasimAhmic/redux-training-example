@@ -1,8 +1,10 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { Table } from "evergreen-ui";
 import TodoItem from "./TodoItem";
+import { selectTodos } from "./todosSlice";
 
-function generateFakeTodos() {
+/* function generateFakeTodos() {
   const todos = [];
 
   for (let i = 0; i < 10; i++) {
@@ -13,12 +15,18 @@ function generateFakeTodos() {
   }
 
   return todos;
-}
+} */
 
 function TodoList(props) {
+  const todos = useSelector((state) => selectTodos(state));
+
   return (
     <Table>
-      <Table.Body>{generateFakeTodos()}</Table.Body>
+      <Table.Body>
+        {todos.map((todo) => (
+          <TodoItem key={todo.id} {...todo} />
+        ))}
+      </Table.Body>
     </Table>
   );
 }

@@ -43,7 +43,10 @@ function reducer(state = initialState, action) {
 
       return state.map((todo) => {
         if (todo.id === id) {
-          todo.completed = true;
+          return {
+            ...todo,
+            completed: true,
+          };
         }
 
         return todo;
