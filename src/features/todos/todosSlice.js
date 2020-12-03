@@ -43,16 +43,18 @@ const createTodo = createAsyncThunk("todos/create", async (content) => {
 
 const fetchTodos = createAsyncThunk("todos/fetch", () => todoService.getTodos());
 
-const completeTodo = createAsyncThunk("todos/complete", async (id, thunk) => {
+const toggleTodoCompleted = createAsyncThunk("todos/complete", async (id, thunk) => {
   let todo = { ...todoSelectors.selectById(thunk.getState(), id) };
 
-  todo.completed = true;
+  todo.completed = !todo.completed;
 
-  await todoService.updateTodo(todo);
+  todo = await todoService.updateTodo(todo);
 
-  toaster.success("Todo completed", { duration: 1 });
+  const completed = todo.completed ? "completed" : "marked incomplete";
 
-  return id;
+  toaster.success(`Todo ${completed}`, { duration: 1 });
+
+  return { id, changes: todo };
 });
 
 const removeTodo = createAsyncThunk("todos/remove", async (id) => {
@@ -81,11 +83,7 @@ const todoSlice = createSlice({
       todoAdapter.setAll(state, action.payload);
     },
     [createTodo.fulfilled]: todoAdapter.addOne,
-    [completeTodo.fulfilled]: (state, action) => {
-      const id = action.payload;
-
-      todoAdapter.updateOne(state, { id, changes: { completed: true } });
-    },
+    [toggleTodoCompleted.fulfilled]: todoAdapter.updateOne,
     [removeTodo.fulfilled]: todoAdapter.removeOne,
   },
 });
@@ -98,7 +96,7 @@ export {
   reducer as default,
   reducer as todosReducer,
   createTodo,
-  completeTodo,
+  toggleTodoCompleted,
   removeTodo,
   fetchTodos,
   filterTodos,

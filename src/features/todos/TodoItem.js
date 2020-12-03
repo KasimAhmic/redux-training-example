@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Table, IconButton, TrashIcon, TickCircleIcon } from "evergreen-ui";
-import { completeTodo, removeTodo, selectTodoById } from "./todosSlice";
+import { toggleTodoCompleted, removeTodo, selectTodoById } from "./todosSlice";
 
 function TodoItem({ id }) {
   const dispatch = useDispatch();
@@ -10,7 +10,7 @@ function TodoItem({ id }) {
   const { content, completed } = todo;
 
   const handleComplete = (evt) => {
-    dispatch(completeTodo(id));
+    dispatch(toggleTodoCompleted(id));
   };
 
   const handleDelete = (evt) => {
