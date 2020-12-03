@@ -1,5 +1,25 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, createEntityAdapter } from "@reduxjs/toolkit";
 import todoService from "../../services/todos";
+
+const todoAdapter = createEntityAdapter({
+  sortComparer: (a, b) => b.date - a.date,
+});
+const initialState = todoAdapter.getInitialState({ loading: false, filter: "All" });
+
+const todoSelectors = todoAdapter.getSelectors((state) => state.todos);
+
+const selectFilteredTodos = (state) => {
+  switch (state.todos.filter) {
+    case "Complete": {
+      return todoSelectors.selectAll(state).filter((todo) => todo.completed);
+    }
+    case "Incomplete": {
+      return todoSelectors.selectAll(state).filter((todo) => !todo.completed);
+    }
+    default:
+      return todoSelectors.selectAll(state);
+  }
+};
 
 const createTodo = createAsyncThunk("todos/create", async (content) => {
   const todo = await todoService.createTodo(content);
@@ -10,7 +30,7 @@ const createTodo = createAsyncThunk("todos/create", async (content) => {
 const fetchTodos = createAsyncThunk("todos/fetch", () => todoService.getTodos());
 
 const completeTodo = createAsyncThunk("todos/complete", async (id, thunk) => {
-  let todo = { ...selectTodoById(thunk.getState(), id) };
+  let todo = { ...todoSelectors.selectById(thunk.getState(), id) };
 
   todo.completed = true;
 
@@ -24,12 +44,6 @@ const removeTodo = createAsyncThunk("todos/remove", async (id) => {
 
   return id;
 });
-
-const initialState = {
-  loading: false,
-  items: [],
-  filter: "All",
-};
 
 const todoSlice = createSlice({
   name: "todos",
@@ -45,50 +59,22 @@ const todoSlice = createSlice({
     },
     [fetchTodos.fulfilled]: (state, action) => {
       state.loading = false;
-      state.items = action.payload;
+
+      todoAdapter.setAll(state, action.payload);
     },
-    [createTodo.fulfilled]: (state, action) => {
-      state.items.push(action.payload);
-    },
+    [createTodo.fulfilled]: todoAdapter.addOne,
     [completeTodo.fulfilled]: (state, action) => {
       const id = action.payload;
 
-      state.items.forEach((todo) => {
-        if (todo.id === id) {
-          todo.completed = true;
-        }
-      });
+      todoAdapter.updateOne(state, { id, changes: { completed: true } });
     },
-    [removeTodo.fulfilled]: (state, action) => {
-      const id = action.payload;
-
-      state.items = state.items.filter((todo) => todo.id !== id);
-    },
+    [removeTodo.fulfilled]: todoAdapter.removeOne,
   },
 });
 
 const { reducer } = todoSlice;
 const { filterTodos } = todoSlice.actions;
-
-// The function below is called a selector and allows us to select a value from
-// the state. Selectors can also be defined inline where they're used instead of
-// in the slice file. For example: `useSelector((state) => state.counter.value)`
-const selectTodos = (state) => state.todos.items;
-
-const selectFilteredTodos = (state) => {
-  switch (state.todos.filter) {
-    case "Complete": {
-      return selectTodos(state).filter((todo) => todo.completed);
-    }
-    case "Incomplete": {
-      return selectTodos(state).filter((todo) => !todo.completed);
-    }
-    default:
-      return selectTodos(state);
-  }
-};
-
-const selectTodoById = (state, id) => selectTodos(state).find((todo) => todo.id === id);
+const { selectAll: selectTodos, selectById: selectTodoById } = todoSelectors;
 
 export {
   reducer as default,
