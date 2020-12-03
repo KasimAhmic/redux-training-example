@@ -9,7 +9,7 @@ function generateFakeTodos() {
     let content =
       Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-    todos.push(<TodoItem id={i} content={content} complete={i % 2 === 0} />);
+    todos.push(<TodoItem id={i} content={content} completed={i % 2 === 0} />);
   }
 
   return todos;

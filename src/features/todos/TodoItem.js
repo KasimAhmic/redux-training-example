@@ -1,7 +1,7 @@
 import React from "react";
-import { Table, IconButton, TrashIcon, Switch } from "evergreen-ui";
+import { Table, IconButton, TrashIcon, TickCircleIcon } from "evergreen-ui";
 
-function TodoItem({ id, content, complete }) {
+function TodoItem({ id, content, completed }) {
   const handleComplete = (evt) => {
     console.log("complete", id);
   };
@@ -11,16 +11,21 @@ function TodoItem({ id, content, complete }) {
   };
 
   return (
-    <Table.Row>
-      <Table.TextCell flexBasis={600} flexShrink={0} flexGrow={0} textAlign="left">
-        {content}
+    <Table.Row onClick={handleComplete} cursor="pointer">
+      <Table.Cell>{completed ? <TickCircleIcon color="success" /> : null}</Table.Cell>
+      <Table.TextCell
+        flexBasis={600}
+        flexShrink={0}
+        flexGrow={0}
+        textAlign="left"
+        justifyContent="center"
+      >
+        {completed ? <s>{content}</s> : content}
       </Table.TextCell>
       <Table.Cell
         justifyContent="flex-end"
         rightView={<IconButton icon={TrashIcon} appearance="minimal" onClick={handleDelete} />}
-      >
-        <Switch checked={complete} onChange={handleComplete} />
-      </Table.Cell>
+      />
     </Table.Row>
   );
 }
