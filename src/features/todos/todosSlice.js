@@ -4,6 +4,7 @@ import {
   createEntityAdapter,
   createSelector,
 } from "@reduxjs/toolkit";
+import { toaster } from "evergreen-ui";
 import todoService from "../../services/todos";
 
 const todoAdapter = createEntityAdapter({
@@ -35,6 +36,8 @@ const selectFilteredTodoIds = (state) => {
 const createTodo = createAsyncThunk("todos/create", async (content) => {
   const todo = await todoService.createTodo(content);
 
+  toaster.notify("Todo added", { duration: 1 });
+
   return todo;
 });
 
@@ -47,11 +50,15 @@ const completeTodo = createAsyncThunk("todos/complete", async (id, thunk) => {
 
   await todoService.updateTodo(todo);
 
+  toaster.success("Todo completed", { duration: 1 });
+
   return id;
 });
 
 const removeTodo = createAsyncThunk("todos/remove", async (id) => {
   await todoService.deleteTodo(id);
+
+  toaster.danger("Todo deleted", { duration: 1 });
 
   return id;
 });
