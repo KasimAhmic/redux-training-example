@@ -1,8 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import todoReducer from "../features/todos/todosSlice";
 
-export default configureStore({
-  reducer: {
-    todos: todoReducer,
-  },
-});
+export default function configureAppStore() {
+  const store = configureStore({
+    reducer: todoReducer,
+  });
+
+  if (process.env.NODE_ENV !== "production" && module.hot) {
+    module.hot.accept("../features/todos/todosSlice", () => store.replaceReducer(todoReducer));
+  }
+
+  return store;
+}
