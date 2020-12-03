@@ -1,24 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { Table } from "evergreen-ui";
 import TodoItem from "./TodoItem";
-import { selectTodos } from "./todosSlice";
-
-/* function generateFakeTodos() {
-  const todos = [];
-
-  for (let i = 0; i < 10; i++) {
-    let content =
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    todos.push(<TodoItem id={i} content={content} complete={i % 2 === 0} />);
-  }
-
-  return todos;
-} */
+import { getTodos, selectFilteredTodos } from "./todosSlice";
 
 function TodoList(props) {
-  const todos = useSelector((state) => selectTodos(state));
+  const dispatch = useDispatch();
+
+  const todos = useSelector((state) => selectFilteredTodos(state));
+  const loading = useSelector((state) => state.todos.loading);
+
+  useEffect(() => {
+    dispatch(getTodos());
+  }, [dispatch]);
+
+  if (loading) return "Loading...";
 
   return (
     <Table>

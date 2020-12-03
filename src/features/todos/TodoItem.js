@@ -15,7 +15,7 @@ function TodoItem({ id, content, completed }) {
   };
 
   return (
-    <Table.Row onClick={handleComplete} cursor="pointer">
+    <Table.Row>
       <Table.Cell>{completed ? <TickCircleIcon color="success" /> : null}</Table.Cell>
       <Table.TextCell
         flexBasis={600}
@@ -23,6 +23,8 @@ function TodoItem({ id, content, completed }) {
         flexGrow={0}
         textAlign="left"
         justifyContent="center"
+        onClick={handleComplete}
+        cursor="pointer"
       >
         {completed ? <s>{content}</s> : content}
       </Table.TextCell>
