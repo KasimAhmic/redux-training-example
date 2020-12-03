@@ -1,17 +1,21 @@
 import React from "react";
 import { Table, IconButton, TrashIcon, TickCircleIcon } from "evergreen-ui";
+import { useDispatch } from "react-redux";
+import { completeTodo, removeTodo } from "./todosSlice";
 
 function TodoItem({ id, content, completed }) {
+  const dispatch = useDispatch();
+
   const handleComplete = (evt) => {
-    console.log("complete", id);
+    dispatch(completeTodo(id));
   };
 
   const handleDelete = (evt) => {
-    console.log("delete", id);
+    dispatch(removeTodo(id));
   };
 
   return (
-    <Table.Row onClick={handleComplete} cursor="pointer">
+    <Table.Row>
       <Table.Cell>{completed ? <TickCircleIcon color="success" /> : null}</Table.Cell>
       <Table.TextCell
         flexBasis={600}
@@ -19,6 +23,8 @@ function TodoItem({ id, content, completed }) {
         flexGrow={0}
         textAlign="left"
         justifyContent="center"
+        onClick={handleComplete}
+        cursor="pointer"
       >
         {completed ? <s>{content}</s> : content}
       </Table.TextCell>

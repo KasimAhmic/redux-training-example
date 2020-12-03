@@ -1,4 +1,4 @@
-import { get, put, post, del } from "services/api";
+import { get, put, post, del } from "../api";
 
 async function getTodos() {
   const todos = await get("/todo");
@@ -15,7 +15,7 @@ async function createTodo(content) {
 }
 
 async function updateTodo(todo) {
-  const updatedTodo = await put("/todo", todo);
+  const updatedTodo = await put(`/todo/${todo.id}`, todo);
 
   return updatedTodo;
 }

@@ -1,24 +1,19 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { Table } from "evergreen-ui";
 import TodoItem from "./TodoItem";
+import { selectTodos } from "./todosSlice";
 
-function generateFakeTodos() {
-  const todos = [];
+function TodoList() {
+  const todos = useSelector(selectTodos);
 
-  for (let i = 0; i < 10; i++) {
-    let content =
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    todos.push(<TodoItem id={i} content={content} completed={i % 2 === 0} />);
-  }
-
-  return todos;
-}
-
-function TodoList(props) {
   return (
     <Table>
-      <Table.Body>{generateFakeTodos()}</Table.Body>
+      <Table.Body>
+        {todos.map((todo) => (
+          <TodoItem key={todo.id} id={todo.id} content={todo.content} completed={todo.completed} />
+        ))}
+      </Table.Body>
     </Table>
   );
 }
