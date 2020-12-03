@@ -3,12 +3,12 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { Table, Spinner, Pane } from "evergreen-ui";
 import TodoItem from "./TodoItem";
-import { fetchTodos, selectFilteredTodos } from "./todosSlice";
+import { fetchTodos, selectFilteredTodoIds } from "./todosSlice";
 
-function TodoList(props) {
+function TodoList() {
   const dispatch = useDispatch();
 
-  const todos = useSelector(selectFilteredTodos);
+  const ids = useSelector(selectFilteredTodoIds);
   const loading = useSelector((state) => state.todos.loading);
 
   useEffect(() => {
@@ -26,8 +26,8 @@ function TodoList(props) {
   return (
     <Table>
       <Table.Body>
-        {todos.map((todo) => (
-          <TodoItem key={todo.id} {...todo} />
+        {ids.map((id) => (
+          <TodoItem key={id} id={id} />
         ))}
       </Table.Body>
     </Table>

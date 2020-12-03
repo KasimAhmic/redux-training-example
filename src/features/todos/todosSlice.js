@@ -1,4 +1,9 @@
-import { createSlice, createAsyncThunk, createEntityAdapter } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  createEntityAdapter,
+  createSelector,
+} from "@reduxjs/toolkit";
 import todoService from "../../services/todos";
 
 const todoAdapter = createEntityAdapter({
@@ -8,16 +13,22 @@ const initialState = todoAdapter.getInitialState({ loading: false, filter: "All"
 
 const todoSelectors = todoAdapter.getSelectors((state) => state.todos);
 
-const selectFilteredTodos = (state) => {
+const selectTodosByCompletion = createSelector(
+  todoSelectors.selectAll,
+  (_, completed) => completed,
+  (todos, completed) => todos.filter((todo) => todo.completed === completed || completed == null)
+);
+
+const selectFilteredTodoIds = (state) => {
   switch (state.todos.filter) {
     case "Complete": {
-      return todoSelectors.selectAll(state).filter((todo) => todo.completed);
+      return selectTodosByCompletion(state, true).map((todo) => todo.id);
     }
     case "Incomplete": {
-      return todoSelectors.selectAll(state).filter((todo) => !todo.completed);
+      return selectTodosByCompletion(state, false).map((todo) => todo.id);
     }
     default:
-      return todoSelectors.selectAll(state);
+      return todoSelectors.selectIds(state);
   }
 };
 
@@ -85,6 +96,7 @@ export {
   fetchTodos,
   filterTodos,
   selectTodos,
-  selectFilteredTodos,
+  selectFilteredTodoIds,
   selectTodoById,
+  selectTodosByCompletion,
 };

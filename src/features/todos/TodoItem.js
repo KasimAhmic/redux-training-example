@@ -1,10 +1,13 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Table, IconButton, TrashIcon, TickCircleIcon } from "evergreen-ui";
-import { completeTodo, removeTodo } from "./todosSlice";
+import { completeTodo, removeTodo, selectTodoById } from "./todosSlice";
 
-function TodoItem({ id, content, completed }) {
+function TodoItem({ id }) {
   const dispatch = useDispatch();
+
+  const todo = useSelector((state) => selectTodoById(state, id));
+  const { content, completed } = todo;
 
   const handleComplete = (evt) => {
     dispatch(completeTodo(id));
