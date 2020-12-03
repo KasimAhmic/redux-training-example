@@ -1,57 +1,29 @@
-//import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import todoService from "../../services/todos";
 
-const ADD_TODO = "todos/add";
-const COMPLETE_TODO = "todos/complete";
-const REMOVE_TODO = "todos/remove";
-const FETCH_TODOS = "todos/fetch";
-const FETCH_TODOS_SUCCESS = "todos/fetch/success";
-const FILTER_TODOS = "todos/filter";
+const createTodo = createAsyncThunk("todos/create", async (content) => {
+  const todo = await todoService.createTodo(content);
 
-function addTodo(content) {
-  return async (dispatch) => {
-    const todo = await todoService.createTodo(content);
+  return todo;
+});
 
-    dispatch({ type: ADD_TODO, payload: todo });
-  };
-}
+const fetchTodos = createAsyncThunk("todos/fetch", () => todoService.getTodos());
 
-function completeTodo(id) {
-  return async (dispatch, getState) => {
-    let todo = { ...selectTodos(getState()).find((todo) => todo.id === id) };
+const completeTodo = createAsyncThunk("todos/complete", async (id, thunk) => {
+  let todo = { ...selectTodoById(thunk.getState(), id) };
 
-    todo.completed = true;
+  todo.completed = true;
 
-    await todoService.updateTodo(todo);
+  await todoService.updateTodo(todo);
 
-    dispatch({ type: COMPLETE_TODO, payload: id });
-  };
-}
+  return id;
+});
 
-function removeTodo(id) {
-  return async (dispatch) => {
-    await todoService.deleteTodo(id);
+const removeTodo = createAsyncThunk("todos/remove", async (id) => {
+  await todoService.deleteTodo(id);
 
-    dispatch({ type: REMOVE_TODO, payload: id });
-  };
-}
-
-function getTodos() {
-  return async (dispatch) => {
-    dispatch({ type: FETCH_TODOS });
-
-    const todos = await todoService.getTodos();
-
-    dispatch({ type: FETCH_TODOS_SUCCESS, payload: todos });
-  };
-}
-
-function filterTodos(filter) {
-  return {
-    type: FILTER_TODOS,
-    payload: filter,
-  };
-}
+  return id;
+});
 
 const initialState = {
   loading: false,
@@ -59,102 +31,51 @@ const initialState = {
   filter: "All",
 };
 
-function reducer(state = initialState, action) {
-  switch (action.type) {
-    case ADD_TODO: {
-      return {
-        ...state,
-        items: [...state.items, action.payload],
-      };
-    }
-
-    case COMPLETE_TODO: {
+const todoSlice = createSlice({
+  name: "todos",
+  initialState,
+  reducers: {
+    filterTodos: (state, action) => {
+      state.filter = action.payload;
+    },
+  },
+  extraReducers: {
+    [fetchTodos.pending]: (state) => {
+      state.loading = true;
+    },
+    [fetchTodos.fulfilled]: (state, action) => {
+      state.loading = false;
+      state.items = action.payload;
+    },
+    [createTodo.fulfilled]: (state, action) => {
+      state.items.push(action.payload);
+    },
+    [completeTodo.fulfilled]: (state, action) => {
       const id = action.payload;
 
-      const updatedTodos = state.items.map((todo) => {
+      state.items.forEach((todo) => {
         if (todo.id === id) {
-          return {
-            ...todo,
-            completed: true,
-          };
+          todo.completed = true;
         }
-
-        return todo;
       });
-
-      return {
-        ...state,
-        items: updatedTodos,
-      };
-    }
-
-    case REMOVE_TODO: {
+    },
+    [removeTodo.fulfilled]: (state, action) => {
       const id = action.payload;
 
-      const updatedTodos = state.items.filter((todo) => todo.id !== id);
+      state.items = state.items.filter((todo) => todo.id !== id);
+    },
+  },
+});
 
-      return {
-        ...state,
-        items: updatedTodos,
-      };
-    }
-
-    case FETCH_TODOS: {
-      return {
-        ...state,
-        loading: true,
-      };
-    }
-
-    case FETCH_TODOS_SUCCESS: {
-      return {
-        ...state,
-        loading: false,
-        items: action.payload,
-      };
-    }
-
-    case FILTER_TODOS: {
-      if (state.filter !== action.payload) {
-        return {
-          ...state,
-          filter: action.payload,
-        };
-      }
-
-      return state;
-    }
-
-    default:
-      return state;
-  }
-}
-
-const actions = {
-  addTodo,
-  completeTodo,
-  removeTodo,
-  getTodos,
-  filterTodos,
-};
-
-export {
-  reducer as default,
-  reducer as todosReducer,
-  actions,
-  addTodo,
-  completeTodo,
-  removeTodo,
-  getTodos,
-  filterTodos,
-};
+const { reducer } = todoSlice;
+const { filterTodos } = todoSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state) => state.counter.value)`
-export const selectTodos = (state) => state.todos.items;
+const selectTodos = (state) => state.todos.items;
 
-export const selectFilteredTodos = (state) => {
+const selectFilteredTodos = (state) => {
   switch (state.todos.filter) {
     case "Complete": {
       return selectTodos(state).filter((todo) => todo.completed);
@@ -165,4 +86,19 @@ export const selectFilteredTodos = (state) => {
     default:
       return selectTodos(state);
   }
+};
+
+const selectTodoById = (state, id) => selectTodos(state).find((todo) => todo.id === id);
+
+export {
+  reducer as default,
+  reducer as todosReducer,
+  createTodo,
+  completeTodo,
+  removeTodo,
+  fetchTodos,
+  filterTodos,
+  selectTodos,
+  selectFilteredTodos,
+  selectTodoById,
 };

@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { Table } from "evergreen-ui";
 import TodoItem from "./TodoItem";
-import { getTodos, selectFilteredTodos } from "./todosSlice";
+import { fetchTodos, selectFilteredTodos } from "./todosSlice";
 
 function TodoList(props) {
   const dispatch = useDispatch();
@@ -12,7 +12,7 @@ function TodoList(props) {
   const loading = useSelector((state) => state.todos.loading);
 
   useEffect(() => {
-    dispatch(getTodos());
+    dispatch(fetchTodos());
   }, [dispatch]);
 
   if (loading) return "Loading...";

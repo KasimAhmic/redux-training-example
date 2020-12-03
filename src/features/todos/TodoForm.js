@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { TextInput, Button } from "evergreen-ui";
-import { addTodo } from "./todosSlice";
+import { createTodo } from "./todosSlice";
 
 function TodoForm(props) {
   const dispatch = useDispatch();
@@ -10,7 +10,7 @@ function TodoForm(props) {
   const handleSubmit = (evt) => {
     evt.preventDefault();
 
-    dispatch(addTodo(content));
+    dispatch(createTodo(content));
 
     setContent("");
   };
