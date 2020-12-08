@@ -1,17 +1,32 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { Table } from "evergreen-ui";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Table, Spinner, Pane } from "evergreen-ui";
 import TodoItem from "./TodoItem";
-import { selectTodos } from "./todosSlice";
+import { fetchTodos, selectFilteredTodoIds } from "./todosSlice";
 
 function TodoList() {
-  const todos = useSelector(selectTodos);
+  const dispatch = useDispatch();
+
+  const todoIds = useSelector(selectFilteredTodoIds);
+  const loading = useSelector((state) => state.todos.loading);
+
+  useEffect(() => {
+    dispatch(fetchTodos());
+  }, [dispatch]);
+
+  if (loading) {
+    return (
+      <Pane display="flex" alignItems="center" justifyContent="center">
+        <Spinner />
+      </Pane>
+    );
+  }
 
   return (
     <Table>
       <Table.Body>
-        {todos.map((todo) => (
-          <TodoItem key={todo.id} id={todo.id} content={todo.content} completed={todo.completed} />
+        {todoIds.map((id) => (
+          <TodoItem key={id} id={id} />
         ))}
       </Table.Body>
     </Table>

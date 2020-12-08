@@ -1,13 +1,15 @@
-import React from "react";
+import React, { memo } from "react";
 import { Table, IconButton, TrashIcon, TickCircleIcon } from "evergreen-ui";
-import { useDispatch } from "react-redux";
-import { completeTodo, removeTodo } from "./todosSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleTodoComplete, removeTodo, selectTodoById } from "./todosSlice";
 
-function TodoItem({ id, content, completed }) {
+function _TodoItem({ id }) {
   const dispatch = useDispatch();
 
+  const { completed, content } = useSelector((state) => selectTodoById(state, id));
+
   const handleComplete = (evt) => {
-    dispatch(completeTodo(id));
+    dispatch(toggleTodoComplete(id));
   };
 
   const handleDelete = (evt) => {
@@ -35,5 +37,7 @@ function TodoItem({ id, content, completed }) {
     </Table.Row>
   );
 }
+
+const TodoItem = memo(_TodoItem);
 
 export { TodoItem as default, TodoItem };
